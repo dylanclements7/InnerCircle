@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+</head>
+<body>
+    <h2>Welcome! Manage Your Groups & Emoji</h2>
+
+    <h3>Create Group</h3>
+    <input type="text" id="group_name" placeholder="Enter Group Name">
+    <input type="text" id="group_id" placeholder="Enter Group ID">
+    <input type="text" id="passcode" placeholder="Enter Passcode">
+    <button onclick="createGroup()">Create</button>
+
+    <h3>Join Group</h3>
+    <input type="text" id="join_group_name" placeholder="Group Name">
+    <input type="text" id="join_passcode" placeholder="Passcode">
+    <button onclick="joinGroup()">Join</button>
+
+    <h3>Change Emoji</h3>
+    <input type="text" id="new_emoji" placeholder="Enter New Emoji">
+    <button onclick="changeEmoji()">Change</button>
+
+    <script>
+        function getCookie(name) {
+            let cookies = document.cookie.split('; ');
+            for (let cookie of cookies) {
+                let [key, value] = cookie.split('=');
+                if (key === name) return value;
+            }
+            return null;
+        }
+
+        function createGroup() {
+            let token = getCookie("login_token");
+            fetch("/create_group", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    group_name: document.getElementById("group_name").value,
+                    group_id: document.getElementById("group_id").value,
+                    passcode: document.getElementById("passcode").value
+                })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+        function joinGroup() {
+            let token = getCookie("login_token");
+            fetch("/join_group", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    group_name: document.getElementById("join_group_name").value,
+                    group_passkey: document.getElementById("join_passcode").value
+                })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+
+        function changeEmoji() {
+            let token = getCookie("login_token");
+            fetch("/change_emoji", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    new_emoji: document.getElementById("new_emoji").value
+                })
+            })
+            .then(response => response.json())
+            .then(data => alert(data.message));
+        }
+    </script>
+</body>
+</html>

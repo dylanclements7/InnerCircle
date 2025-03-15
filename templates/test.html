@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Flask App</title>
+    <script>
+
+
+
+        // Function to send data to the Flask server
+        function sendRequest(url, data, callback) {
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Success:', data);
+                callback(data);  // Callback to handle success
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('Error submitting data');
+            });
+        }
+
+        // Function to handle user creation form submission
+        function submitUserForm() {
+            const userName = document.getElementById('user_name').value;
+            const userId = document.getElementById('user_id').value;
+            const emotion = document.getElementById('emotion').value;
+
+            const userData = {
+                user_name: userName,
+                user_id: userId,
+                emotion: emotion
+            };
+
+            sendRequest('/create_user', userData, function(response) {
+                // Store JWT token in localStorage after user creation
+                if (response.token) {
+                    localStorage.setItem('jwt_token', response.token);
+                    alert('User created and JWT token saved!');
+                }
+            });
+        }
+
+        // Function to handle emoji change form submission
+        function submitChangeEmojiForm() {
+            const newEmoji = document.getElementById('new_emoji').value;
+            const token = localStorage.getItem('jwt_token'); // Retrieve JWT from localStorage
+
+            if (!token) {
+                alert("You need to log in first!");
+                return;
+            }
+
+            fetch('/change_emoji', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`  // Ensure the token is sent with "Bearer "
+                },
+                body: JSON.stringify({ new_emoji: newEmoji })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.error) {
+                    alert('Error: ' + data.error);
+                } else {
+                    alert('Emoji changed successfully!');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        }
+
+        // Function to handle group creation form submission
+        function submitGroupForm() {
+            const groupName = document.getElementById('group_name').value;
+            const groupId = document.getElementById('group_id').value;
+            const isPublic = document.getElementById('is_public').checked;
+            const passcode = document.getElementById('passcode').value;
+
+            const groupData = {
+                group_name: groupName,
+                group_id: groupId,
+                is_public: isPublic,
+                passcode: passcode
+            };
+
+            sendRequest('/create_group', groupData, function(response) {
+                alert('Group created successfully!');
+            });
+        }
+
+        // Function to handle joining a group
+        function submitJoinGroupForm() {
+            const groupId = document.getElementById('join_group_id').value;
+            const token = localStorage.getItem('jwt_token');
+
+            if (!token) {
+                alert("You need to log in first!");
+                return;
+            }
+
+            const joinData = {
+                group_id: groupId
+            };
+
+            fetch('/join_group', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + token  // Include JWT token in Authorization header
+                },
+                body: JSON.stringify(joinData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log(data);
+                alert('Successfully joined the group!');
+            })
+            .catch(error => console.error('Error:', error));
+        }
+    </script>
+</head>
+<body>
+    <h1>Test Flask App</h1>
+
+    <!-- User Creation Form -->
+    <h2>Create User</h2>
+    <form id="userForm" onsubmit="event.preventDefault(); submitUserForm();">
+        <label for="user_name">User Name:</label>
+        <input type="text" id="user_name" required><br><br>
+
+        <label for="user_id">User ID:</label>
+        <input type="number" id="user_id" required><br><br>
+
+        <label for="emotion">Emotion:</label>
+        <input type="text" id="emotion" required><br><br>
+
+        <button type="submit">Create User</button>
+    </form>
+
+    <hr>
+
+    <!-- Change Emoji Form -->
+    <h2>Change Emoji</h2>
+    <form id="changeEmojiForm" onsubmit="event.preventDefault(); submitChangeEmojiForm();">
+        <label for="new_emoji">New Emoji:</label>
+        <input type="text" id="new_emoji" required><br><br>
+        <button type="submit">Change Emoji</button>
+    </form>
+
+    <hr>
+
+    <!-- Group Creation Form -->
+    <h2>Create Group</h2>
+    <form id="groupForm" onsubmit="event.preventDefault(); submitGroupForm();">
+        <label for="group_name">Group Name:</label>
+        <input type="text" id="group_name" required><br><br>
+
+        <label for="group_id">Group ID:</label>
+        <input type="number" id="group_id" required><br><br>
+
+        <label for="is_public">Is Public:</label>
+        <input type="checkbox" id="is_public"><br><br>
+
+        <label for="passcode">Passcode:</label>
+        <input type="text" id="passcode" required><br><br>
+
+        <button type="submit">Create Group</button>
+    </form>
+
+    <hr>
+
+    <!-- Join Group Form -->
+    <h2>Join Group</h2>
+    <form id="joinGroupForm" onsubmit="event.preventDefault(); submitJoinGroupForm();">
+        <label for="join_group_id">Group ID:</label>
+        <input type="number" id="join_group_id" required><br><br>
+        <button type="submit">Join Group</button>
+    </form>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <script>
+        async function createUser(event) {
+            event.preventDefault();
+            
+            const userName = document.getElementById('user_name').value;
+            const emotion = document.getElementById('emotion').value;
+            const userId = Math.floor(Math.random() * 1000000); 
+            
+            const response = await fetch('/create_user', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ user_name: userName, user_id: userId, emotion: emotion })
+            });
+            
+            const data = await response.json();
+            if (response.ok) {
+                document.cookie = `login_token=${data.token}; path=/; max-age=3600; HttpOnly`;
+                window.location.href = '/'; // Redirect to dashboard
+            } else {
+                alert(data.message);
+            }
+        }
+    </script>
+</head>
+<body>
+    <h2>Login</h2>
+    <form onsubmit="createUser(event)">
+        <label for="user_name">Username:</label>
+        <input type="text" id="user_name" required>
+        <br>
+        <label for="emotion">Emotion:</label>
+        <input type="text" id="emotion" required>
+        <br>
+        <button type="submit">Login</button>
+    </form>
+</body>
+</html>
