@@ -33,19 +33,30 @@ class Link(db.Model):
 def verify_token(token):
 	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 	if (datetime(decoded_token['exp']) < datetime.now()):
+		response = app.response_class(
+			response=json.dumps({"message": "User created successfully!", "token": token}),
+			status=200,
+			mimetype='application/json'
+		)
+		response.set_cookie('login_token', token, httponly=True, max_age=3600)
+
 		return generate_login_token(decoded_token['user_id'])
 	return decoded_token
 
 @app.route('/')
 def index():
 	# check if token exists, if not log in
+	# return render_template('test.html')
 	token = request.cookies.get('login_token')
 	# Connect using token if present
 	if (token):
 		token = verify_token(token)
 		return render_template('dashboard.html')
+		# return render_template('login.html')
+		# return render_template('test.html')
 	else:
 		return render_template('login.html')
+		# return render_template('test.html')
 		
 # link the new group to the creator, generate a group passkey
 @app.route('/create_group', methods=['POST'])
@@ -61,13 +72,16 @@ def create_group():
 
 def generate_login_token(user_id):
 	expiration = datetime.now() + timedelta(hours=1)
-	try:
-		token = request.headers.get('Authorization')
-		print('\n',token,'\n')
-		token = token.split("Bearer ")[1]  # Strip "Bearer " from token
-	except jwt.InvalidTokenError:
-		return json.dumps({"message": "Invalid token!"})
 	return jwt.encode({"user_id": user_id, "exp": expiration}, app.config['SECRET_KEY'], algorithm="HS256")
+	#expiration = datetime.now() + timedelta(hours=1)
+	#try:
+		
+		#token = request.headers.get('Authorization')
+		#print('\n',token,'\n')
+		#token = token.split("Bearer ")[1]  # Strip "Bearer " from token
+	#except jwt.InvalidTokenError:
+		#return json.dumps({"message": "Invalid token!"})
+	#return jwt.encode({"user_id": user_id, "exp": expiration}, app.config['SECRET_KEY'], algorithm="HS256")
 
 
 def get_user_groups(user_id):
@@ -118,9 +132,13 @@ def join_group():
 
 
 def get_user_id():
-	token = request.cookies.get('login_token')
-	token = verify_token(token)
-	return token['user_id']
+	token = request.headers.get('Authorization')
+	token = token.split("Bearer ")[1]  # Strip "Bearer " from token
+	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+	return decoded_token['user_id']
+	#token = request.cookies.get('login_token')
+	#token = verify_token(token)
+	#return token['user_id']
 	
 
 # change emoji of a user
