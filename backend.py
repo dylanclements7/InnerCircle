@@ -45,6 +45,7 @@ def verify_token(token):
 
 @app.route('/')
 def index():
+	print('index')
 	# check if token exists, if not log in
 	# return render_template('test.html')
 	token = request.cookies.get('login_token')
@@ -61,10 +62,17 @@ def index():
 # link the new group to the creator, generate a group passkey
 @app.route('/create_group', methods=['POST'])
 def create_group():
-	group_name = request.json['group_name']
-	group_id = request.json['group_id']
-	is_anonymous = request.json['is_anonymous']
-	passcode = request.json['passcode']
+	# group_name = request.json['group_name']
+	# group_id = request.json['group_id']
+	# is_anonymous = request.json['is_anonymous']
+	# passcode = request.json['passcode']
+
+	fields = request.get_json()
+	group_name = fields['group_name']
+	group_id = fields['group_id']
+	is_anonymous = fields['is_anonymous']
+	passcode = fields['passcode']
+
 	new_group = Group(group_name=group_name, group_id=group_id, is_anonymous=is_anonymous, passcode=passcode)
 	db.session.add(new_group)
 	db.session.commit()
@@ -85,20 +93,35 @@ def generate_login_token(user_id):
 
 
 def get_user_groups(user_id):
+	print("get_user_groups")
 	user_groups = Link.query.filter_by(user_id=user_id).all()
 	group_ids = [link.group_id for link in user_groups]
 	return group_ids
 
 def get_group_users(group_id):
+	print("get_group_users")
 	group_users = Link.query.filter_by(group_id=group_id).all()
 	user_ids = [link.user_id for link in group_users]
 	return user_ids
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
+	print("create_user")
+	# fields = request.get_json()
+	# print(fields)
+	print("username")
 	user_name = request.json['user_name']
-	user_id = request.json['user_id']
-	emotion = request.json['emotion']
+	# user_name = fields['user_name']
+	print("user_id")
+	# user_id = request.json['user_id']
+	# user_id = fields['user_id']
+	print("emotion ")
+	# emotion = request.json['emotion']
+	# emotion = fields['emotion']
+	print("done")
+
+	
+
 	new_user = User(user_name=user_name, user_id=user_id, emotion=emotion)
 	db.session.add(new_user)
 	db.session.commit()
@@ -117,6 +140,7 @@ def create_user():
 #join a group, enter a groupname and passcode, link you to that group
 @app.route('/join_group', methods=['POST'])
 def join_group():
+	print("join_group")
 	user_id = get_user_id()
 	group_name = request.json["group_name"]
 	group_passkey = request.json["group_passkey"]
@@ -132,6 +156,7 @@ def join_group():
 
 
 def get_user_id():
+	print("get_user_id")
 	token = request.headers.get('Authorization')
 	token = token.split("Bearer ")[1]  # Strip "Bearer " from token
 	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
@@ -144,6 +169,7 @@ def get_user_id():
 # change emoji of a user
 @app.route('/change_emoji', methods=['POST'])
 def change_emoji():
+	pritn("change_emoji")
 	user_id = get_user_id()
 	new_emoji = request.json['new_emoji']
 	user = User.query.filter_by(user_id=user_id).first()

@@ -4,6 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Flask API Test</title>
+    <style>
+        body {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            font-family: Arial, sans-serif;
+        }
+        form {
+            margin-bottom: 2em;
+            padding: 1em;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        .error {
+            color: red;
+            display: none;
+            margin-top: 5px;
+        }
+    </style>
 </head>
 <body>
     <h1>Test Flask API</h1>
@@ -17,6 +36,7 @@
         <label for="emotion">Emotion:</label>
         <input type="text" id="emotion" name="emotion" required><br><br>
         <button type="submit">Create User</button>
+        <div id="create-user-error" class="error"></div>
     </form>
 
     <h2>Create Group</h2>
@@ -30,6 +50,7 @@
         <label for="passcode">Passcode:</label>
         <input type="text" id="passcode" name="passcode" required><br><br>
         <button type="submit">Create Group</button>
+        <div id="create-group-error" class="error"></div>
     </form>
 
     <h2>Join Group</h2>
@@ -39,6 +60,7 @@
         <label for="join-group-passkey">Passcode:</label>
         <input type="text" id="join-group-passkey" name="group_passkey" required><br><br>
         <button type="submit">Join Group</button>
+        <div id="join-group-error" class="error"></div>
     </form>
 
     <h2>Change Emoji</h2>
@@ -46,73 +68,115 @@
         <label for="new_emoji">New Emoji:</label>
         <input type="text" id="new_emoji" name="new_emoji" required><br><br>
         <button type="submit">Change Emoji</button>
+        <div id="change-emoji-error" class="error"></div>
     </form>
 
     <script>
-        document.getElementById('create-user-form').addEventListener('submit', function(event) {
-            event.preventDefault();
-            const userName = document.getElementById('user_name').value;
-            const userId = document.getElementById('user_id').value;
-            const emotion = document.getElementById('emotion').value;
+        const headers = {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json'
+        };
 
-            fetch('/create_user', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ user_name: userName, user_id: userId, emotion: emotion })
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message));
+        async function handleResponse(response, errorElement) {
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || `HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        }
+
+        function showError(element, message) {
+            element.textContent = message;
+            element.style.display = 'block';
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        document.getElementById('create-user-form').addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const errorElement = document.getElementById('create-user-error');
+            
+            try {
+                const response = await fetch('/create_user', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        user_name: document.getElementById('user_name').value,
+                        user_id: parseInt(document.getElementById('user_id').value),
+                        emotion: document.getElementById('emotion').value
+                    })
+                });
+                const data = await handleResponse(response, errorElement);
+                alert(data.message);
+                this.reset();
+            } catch (error) {
+                showError(errorElement, error.message);
+            }
         });
 
-        document.getElementById('create-group-form').addEventListener('submit', function(event) {
+        document.getElementById('create-group-form').addEventListener('submit', async function(event) {
             event.preventDefault();
-            const groupName = document.getElementById('group_name').value;
-            const groupId = document.getElementById('group_id').value;
-            const isAnonymous = document.getElementById('is_anonymous').checked;
-            const passcode = document.getElementById('passcode').value;
-
-            fetch('/create_group', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ group_name: groupName, group_id: groupId, is_anonymous: isAnonymous, passcode: passcode })
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message));
+            const errorElement = document.getElementById('create-group-error');
+            
+            try {
+                const response = await fetch('/create_group', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        group_name: document.getElementById('group_name').value,
+                        group_id: parseInt(document.getElementById('group_id').value),
+                        is_anonymous: document.getElementById('is_anonymous').checked,
+                        passcode: document.getElementById('passcode').value
+                    })
+                });
+                const data = await handleResponse(response, errorElement);
+                alert(data.message);
+                this.reset();
+            } catch (error) {
+                showError(errorElement, error.message);
+            }
         });
 
-        document.getElementById('join-group-form').addEventListener('submit', function(event) {
+        document.getElementById('join-group-form').addEventListener('submit', async function(event) {
             event.preventDefault();
-            const groupName = document.getElementById('join-group-name').value;
-            const groupPasskey = document.getElementById('join-group-passkey').value;
-
-            fetch('/join_group', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ group_name: groupName, group_passkey: groupPasskey })
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message));
+            const errorElement = document.getElementById('join-group-error');
+            
+            try {
+                const response = await fetch('/join_group', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        group_name: document.getElementById('join-group-name').value,
+                        group_passkey: document.getElementById('join-group-passkey').value
+                    })
+                });
+                const data = await handleResponse(response, errorElement);
+                alert(data.message);
+                this.reset();
+            } catch (error) {
+                showError(errorElement, error.message);
+            }
         });
 
-        document.getElementById('change-emoji-form').addEventListener('submit', function(event) {
+        document.getElementById('change-emoji-form').addEventListener('submit', async function(event) {
             event.preventDefault();
-            const newEmoji = document.getElementById('new_emoji').value;
-
-            fetch('/change_emoji', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ new_emoji: newEmoji })
-            })
-            .then(response => response.json())
-            .then(data => alert(data.message));
+            const errorElement = document.getElementById('change-emoji-error');
+            
+            try {
+                const response = await fetch('/change_emoji', {
+                    method: 'POST',
+                    headers: headers,
+                    body: JSON.stringify({
+                        new_emoji: document.getElementById('new_emoji').value
+                    })
+                });
+                const data = await handleResponse(response, errorElement);
+                alert(data.message);
+                this.reset();
+            } catch (error) {
+                showError(errorElement, error.message);
+            }
         });
     </script>
 </body>
