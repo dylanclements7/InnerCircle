@@ -1,9 +1,9 @@
 {
-  "name": "inner-circle",
-  "displayName": "Inner circle",
+  "name": "my-extension",
+  "displayName": "My extension",
   "version": "0.0.1",
-  "description": "A basic Plasmo extension.",
-  "author": "hci-lab-rats",
+  "description": "test my extension",
+  "author": "charlie",
   "scripts": {
     "dev": "plasmo dev",
     "build": "plasmo build",
