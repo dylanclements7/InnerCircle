@@ -109,32 +109,30 @@ def create_user():
 	print("create_user")
 	# fields = request.get_json()
 	# print(fields)
-	print("username")
-	user_name = request.json['user_name']
-	# user_name = fields['user_name']
-	print("user_id")
-	# user_id = request.json['user_id']
-	# user_id = fields['user_id']
-	print("emotion ")
-	# emotion = request.json['emotion']
-	# emotion = fields['emotion']
-	print("done")
+	# print("username")
+	user_name = request.form['user_name']
+	print(user_name)
+	# print("user_id")
+	user_id = 500
+	# print("emotion ")
+	emotion = "happy"
+	# print("done")
 
 	
 
 	new_user = User(user_name=user_name, user_id=user_id, emotion=emotion)
 	db.session.add(new_user)
 	db.session.commit()
-	
+	print("\npre response\n")
 	token = generate_login_token(user_id= user_id)
 	response = app.response_class(
 		response=json.dumps({"message": "User created successfully!", "token": token}),
 		status=200,
 		mimetype='application/json'
 	)
+	print("\nresponse made\n")
 	response.set_cookie('login_token', token, httponly=True, max_age=3600)
-	return response
-	# return json.dumps({"message": "User created successfully!", "token": token})
+	return json.dumps({"message": "User created successfully!", "token": token})
 
 
 #join a group, enter a groupname and passcode, link you to that group
@@ -169,7 +167,7 @@ def get_user_id():
 # change emoji of a user
 @app.route('/change_emoji', methods=['POST'])
 def change_emoji():
-	pritn("change_emoji")
+	print("change_emoji")
 	user_id = get_user_id()
 	new_emoji = request.json['new_emoji']
 	user = User.query.filter_by(user_id=user_id).first()
