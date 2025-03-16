@@ -1,10 +1,10 @@
-from flask import Flask, redirect, url_for, request
+from flask import Flask, redirect, url_for, request, make_response
 import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from flask import render_template
 import jwt
-from datetime import datetime, timedelta
+import time
 
 
 
@@ -17,31 +17,37 @@ db = SQLAlchemy(app)
 
 class User(db.Model):
 	user_name: Mapped[str] = mapped_column()
-	user_id: Mapped[int] = mapped_column(primary_key=True)
+	user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	emotion: Mapped[str] = mapped_column()
 
 class Group(db.Model):
 	group_name: Mapped[str] = mapped_column()
-	group_id: Mapped[int] = mapped_column(primary_key=True)
+	group_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	is_anonymous: Mapped[bool] = mapped_column()
 	passcode: Mapped[str] = mapped_column()
+	interval: Mapped[int] = mapped_column()
+	owner_id: Mapped[int] = mapped_column()
 	
 class Link(db.Model):
 	user_id: Mapped[int] = mapped_column(primary_key=True)
 	group_id: Mapped[int] = mapped_column()
 
 def verify_token(token):
-	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-	if (datetime(decoded_token['exp']) < datetime.now()):
-		response = app.response_class(
-			response=json.dumps({"message": "User created successfully!", "token": token}),
-			status=200,
-			mimetype='application/json'
-		)
-		response.set_cookie('login_token', token, httponly=True, max_age=3600)
+	try:
+		decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+		if decoded_token['exp'] > int(time.time()):
+			response = app.response_class(
+				response=json.dumps({"message": "User created successfully!", "token": token}),
+				status=200,
+				mimetype='application/json'
+			)
+			response.set_cookie('login_token', token, httponly=True, max_age=3600)
 
-		return generate_login_token(decoded_token['user_id'])
-	return decoded_token
+			return generate_login_token(decoded_token['user_id'])
+	except jwt.ExpiredSignatureError:
+		return None
+	except jwt.InvalidTokenError:
+		return None
 
 @app.route('/')
 def index():
@@ -62,36 +68,26 @@ def index():
 # link the new group to the creator, generate a group passkey
 @app.route('/create_group', methods=['POST'])
 def create_group():
-	# group_name = request.json['group_name']
-	# group_id = request.json['group_id']
-	# is_anonymous = request.json['is_anonymous']
-	# passcode = request.json['passcode']
-
-	fields = request.get_json()
-	group_name = fields['group_name']
-	group_id = fields['group_id']
-	is_anonymous = fields['is_anonymous']
-	passcode = fields['passcode']
-
-	new_group = Group(group_name=group_name, group_id=group_id, is_anonymous=is_anonymous, passcode=passcode)
+	print("\ncreate_group\n")
+	group_name = request.form['group_name']
+	is_anonymous = 'is_anonymous' in request.form
+	passcode = request.form['passcode']
+	interval = request.form['interval']
+	owner_id = get_user_id()
+	new_group = Group(group_name=group_name, is_anonymous=is_anonymous, passcode=passcode, interval=interval, owner_id=owner_id)
 	db.session.add(new_group)
+	db.session.commit()
+	group_id = new_group.group_id
+	user_id = get_user_id()
+	new_link = Link(user_id=user_id, group_id=group_id)
+	db.session.add(new_link)
 	db.session.commit()
 	return json.dumps({"message": "Group created successfully!"})
 
 def generate_login_token(user_id):
-	expiration = datetime.now() + timedelta(hours=1)
+	expiration = int(time.time()) + 3600
 	return jwt.encode({"user_id": user_id, "exp": expiration}, app.config['SECRET_KEY'], algorithm="HS256")
-	#expiration = datetime.now() + timedelta(hours=1)
-	#try:
-		
-		#token = request.headers.get('Authorization')
-		#print('\n',token,'\n')
-		#token = token.split("Bearer ")[1]  # Strip "Bearer " from token
-	#except jwt.InvalidTokenError:
-		#return json.dumps({"message": "Invalid token!"})
-	#return jwt.encode({"user_id": user_id, "exp": expiration}, app.config['SECRET_KEY'], algorithm="HS256")
-
-
+	
 def get_user_groups(user_id):
 	print("get_user_groups")
 	user_groups = Link.query.filter_by(user_id=user_id).all()
@@ -106,33 +102,21 @@ def get_group_users(group_id):
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
-	print("create_user")
-	# fields = request.get_json()
-	# print(fields)
-	# print("username")
+	print("\ncreate_user\n")
 	user_name = request.form['user_name']
 	print(user_name)
-	# print("user_id")
-	user_id = 500
-	# print("emotion ")
 	emotion = "happy"
-	# print("done")
-
-	
-
-	new_user = User(user_name=user_name, user_id=user_id, emotion=emotion)
+	new_user = User(user_name=user_name, emotion=emotion)
 	db.session.add(new_user)
 	db.session.commit()
-	print("\npre response\n")
+
+	user_id = new_user.user_id
 	token = generate_login_token(user_id= user_id)
-	response = app.response_class(
-		response=json.dumps({"message": "User created successfully!", "token": token}),
-		status=200,
-		mimetype='application/json'
-	)
-	print("\nresponse made\n")
+	response = make_response(render_template('dashboard.html'))
 	response.set_cookie('login_token', token, httponly=True, max_age=3600)
-	return json.dumps({"message": "User created successfully!", "token": token})
+
+	return response
+
 
 
 #join a group, enter a groupname and passcode, link you to that group
@@ -140,8 +124,8 @@ def create_user():
 def join_group():
 	print("join_group")
 	user_id = get_user_id()
-	group_name = request.json["group_name"]
-	group_passkey = request.json["group_passkey"]
+	group_name = request.form["group_name"]
+	group_passkey = request.form["group_passkey"]
 	group = Group.query.filter_by(group_name=group_name).first()
 	if not group:
 		return json.dumps({"message":"Group does not exist"})
@@ -152,24 +136,53 @@ def join_group():
 	db.session.commit()
 	return json.dumps({"message": "User joined group successfully!"})
 
+#leave group
+@app.route('/leave_group', methods=['POST'])
+def leave_group():
+	print("\nleave_group\n")
+	user_id = get_user_id()
+	group_name = request.form['group_name']
+	group_id = Group.query.filter_by(group_name=group_name).first().group_id
+	link = Link.query.filter_by(user_id=user_id, group_id=group_id).first()
+	if link:
+		db.session.delete(link)
+		db.session.commit()
+		return json.dumps({"message": "User left group successfully!"})
+	else:
+		return json.dumps({"message": "User not in group!"})
+
+#delete group
+@app.route('/delete_group', methods=['POST'])
+def delete_group():
+	print("\ndelete_group\n")
+	group_name = request.form['group_name']
+	group_id = Group.query.filter_by(group_name=group_name).first().group_id
+	owner_id = Group.query.filter_by(group_id=group_id).first().owner_id
+	user_id = get_user_id()
+	if owner_id != user_id:
+		return json.dumps({"message": "User not owner of group!"})
+	links = Link.query.filter_by(group_id=group_id).all()
+	for link in links:
+		db.session.delete(link)
+	db.session.commit()
+	group = Group.query.filter_by(group_id=group_id).first()
+	db.session.delete(group)
+	db.session.commit()
+	return json.dumps({"message": "Group deleted successfully!"})
+
 
 def get_user_id():
-	print("get_user_id")
-	token = request.headers.get('Authorization')
-	token = token.split("Bearer ")[1]  # Strip "Bearer " from token
+	token = request.cookies.get('login_token')
 	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 	return decoded_token['user_id']
-	#token = request.cookies.get('login_token')
-	#token = verify_token(token)
-	#return token['user_id']
 	
 
 # change emoji of a user
 @app.route('/change_emoji', methods=['POST'])
 def change_emoji():
-	print("change_emoji")
+	print("\nchange_emoji\n")
 	user_id = get_user_id()
-	new_emoji = request.json['new_emoji']
+	new_emoji = request.form['new_emoji']
 	user = User.query.filter_by(user_id=user_id).first()
 	user.emotion = new_emoji
 	db.session.commit()
@@ -179,5 +192,3 @@ if __name__ == '__main__':
 	with app.app_context():
 		db.create_all() 
 	app.run(debug=True, port=8080)
-
-	

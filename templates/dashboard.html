@@ -3,124 +3,52 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
-    <script>
-        // Get the JWT token from the cookie
-        function getCookie(name) {
-            let value = `; ${document.cookie}`;
-            let parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
-
-        // Change emoji
-        async function changeEmoji() {
-            const new_emoji = document.getElementById("new_emoji").value;
-            const token = getCookie("login_token");
-
-            const response = await fetch('/change_emoji', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    new_emoji: new_emoji,
-                }),
-            });
-
-            const data = await response.json();
-            if (data.message === "Emoji changed successfully!") {
-                alert('Emoji changed!');
-            } else {
-                alert('Failed to change emoji');
-            }
-        }
-
-        // Create group
-        async function createGroup() {
-            const group_name = document.getElementById("group_name").value;
-            const group_id = document.getElementById("group_id").value;
-            const is_anonymous = document.getElementById("is_anonymous").checked;
-            const passcode = document.getElementById("passcode").value;
-            const token = getCookie("login_token");
-
-            const response = await fetch('/create_group', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    group_name: group_name,
-                    group_id: group_id,
-                    is_anonymous: is_anonymous,
-                    passcode: passcode,
-                }),
-            });
-
-            const data = await response.json();
-            if (data.message === "Group created successfully!") {
-                alert('Group created!');
-            } else {
-                alert('Failed to create group');
-            }
-        }
-
-        // Join group
-        async function joinGroup() {
-            const group_name = document.getElementById("join_group_name").value;
-            const group_passkey = document.getElementById("join_group_passkey").value;
-            const token = getCookie("login_token");
-
-            const response = await fetch('/join_group', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    group_name: group_name,
-                    group_passkey: group_passkey,
-                }),
-            });
-
-            const data = await response.json();
-            if (data.message === "User joined group successfully!") {
-                alert('Joined group!');
-            } else {
-                alert('Failed to join group');
-            }
-        }
-    </script>
+    <title>Backend Test</title>
 </head>
 <body>
-    <h1>Welcome to the Dashboard</h1>
+    <h1>Backend Test</h1>
 
     <h2>Change Emoji</h2>
-    <label for="new_emoji">New Emoji:</label>
-    <input type="text" id="new_emoji" required><br>
-    <button onclick="changeEmoji()">Change Emoji</button>
-
-    <hr>
+    <form action="/change_emoji" method="post">
+        <label for="new_emoji">New Emoji:</label>
+        <input type="text" id="new_emoji" name="new_emoji">
+        <button type="submit">Change Emoji</button>
+    </form>
 
     <h2>Create Group</h2>
-    <label for="group_name">Group Name:</label>
-    <input type="text" id="group_name" required><br>
-    <label for="group_id">Group ID:</label>
-    <input type="number" id="group_id" required><br>
-    <label for="is_anonymous">Is Anonymous:</label>
-    <input type="checkbox" id="is_anonymous"><br>
-    <label for="passcode">Passcode:</label>
-    <input type="text" id="passcode" required><br>
-    <button onclick="createGroup()">Create Group</button>
-
-    <hr>
+    <form action="/create_group" method="post">
+        <label for="group_name">Group Name:</label>
+        <input type="text" id="group_name" name="group_name">
+        <label for="is_anonymous">Is Anonymous:</label>
+        <input type="checkbox" id="is_anonymous" name="is_anonymous" value="true">
+        <label for="passcode">Passcode:</label>
+        <input type="text" id="passcode" name="passcode">
+        <label for="interval">Interval:</label>
+        <input type="text" id="interval" name="interval">
+        <button type="submit">Create Group</button>
+    </form>
 
     <h2>Join Group</h2>
-    <label for="join_group_name">Group Name:</label>
-    <input type="text" id="join_group_name" required><br>
-    <label for="join_group_passkey">Group Passkey:</label>
-    <input type="text" id="join_group_passkey" required><br>
-    <button onclick="joinGroup()">Join Group</button>
+    <form action="/join_group" method="post">
+        <label for="group_name">Group Name:</label>
+        <input type="text" id="group_name" name="group_name">
+        <label for="group_passkey">Group Passkey:</label>
+        <input type="text" id="group_passkey" name="group_passkey">
+        <button type="submit">Join Group</button>
+    </form>
+
+    <h2>Leave Group</h2>
+    <form action="/leave_group" method="post">
+        <label for="group_name">Group Name:</label>
+        <input type="text" id="group_name" name="group_name">
+        <button type="submit">Leave Group</button>
+    </form>
+
+    <h2>Delete Group</h2>
+    <form action="/delete_group" method="post">
+        <label for="group_name">Group Name:</label>
+        <input type="text" id="group_name" name="group_name">
+        <button type="submit">Delete Group</button>
+    </form>
 </body>
 </html>
