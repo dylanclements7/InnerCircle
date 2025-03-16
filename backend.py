@@ -6,9 +6,11 @@ from flask import render_template
 import jwt
 import time
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_cors import CORS
 
 
 app = Flask(__name__)
+CORS(app)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SECRET_KEY'] = 'this'
@@ -33,22 +35,38 @@ class Link(db.Model):
 	user_id: Mapped[int] = mapped_column(primary_key=True)
 	group_id: Mapped[int] = mapped_column()
 
+
 def verify_token(token):
+	success = True
+	decoded_token = {}
 	try:
 		decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 		if decoded_token['exp'] > int(time.time()):
-			response = app.response_class(
-				response=json.dumps({"message": "User created successfully!", "token": token}),
-				status=200,
-				mimetype='application/json'
-			)
-			response.set_cookie('login_token', token, httponly=True, max_age=3600)
+			# response = app.response_class(
+			# 	response=json.dumps({"message": "User created successfully!", "token": token}),
+			# 	status=200,
+			# 	mimetype='application/json'
+			# )
+			# response.set_cookie('login_token', token, httponly=True, max_age=3600)
 
-			return generate_login_token(decoded_token['user_id'])
+			token = generate_login_token(decoded_token['user_id'])
+			decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 	except jwt.ExpiredSignatureError:
-		return None
+		success = False
 	except jwt.InvalidTokenError:
-		return None
+		success = False
+	
+	result = jsonify({
+		'success': success,
+		'token': token
+	})
+
+	return result
+
+@app.route('/check_token', methods=['POST'])
+def check_token():
+	token = request.form
+	return verify_token(token)
 
 @app.route('/')
 def index():
@@ -106,12 +124,13 @@ def create_user():
 	print("\ncreate_user\n")
 	success = True
 	values = request.get_json()
+	print(f"values: {values}")
 	try:
 		user_name = values['user_name']
 		password = values['password']
 		password_hash = generate_password_hash(password)
-		print(f"user_name: {user_name}")
-		print(f"password: {password}")
+		# print(f"user_name: {user_name}")
+		# print(f"password: {password}")
 		emotion = "happy"
 		new_user = User(user_name=user_name, emotion=emotion, password_hash=password_hash)
 	except:
@@ -129,7 +148,7 @@ def create_user():
 		'success': success,
 		'token': token
 	})
-
+	print(f"response: {response}")
 	return response
 
 @app.route('/login', methods=['POST'])
