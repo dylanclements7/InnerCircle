@@ -1,4 +1,4 @@
-from flask import Flask, redirect, url_for, request, make_response
+from flask import Flask, redirect, url_for, request, make_response, jsonify
 import json
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
@@ -104,35 +104,57 @@ def get_group_users(group_id):
 @app.route('/create_user', methods=['POST'])
 def create_user():
 	print("\ncreate_user\n")
-	user_name = request.form['user_name']
-	password = request.form['password']
-	password_hash = generate_password_hash(password)
-	print(user_name)
-	emotion = "happy"
-	new_user = User(user_name=user_name, emotion=emotion, password_hash=password_hash)
+	success = True
+	values = request.get_json()
+	try:
+		user_name = values['user_name']
+		password = values['password']
+		password_hash = generate_password_hash(password)
+		print(f"user_name: {user_name}")
+		print(f"password: {password}")
+		emotion = "happy"
+		new_user = User(user_name=user_name, emotion=emotion, password_hash=password_hash)
+	except:
+		success = False
+	print(f"success: {success}")
 	db.session.add(new_user)
 	db.session.commit()
 
 	user_id = new_user.user_id
 	token = generate_login_token(user_id= user_id)
-	response = make_response(render_template('dashboard.html'))
-	response.set_cookie('login_token', token, httponly=True, max_age=3600)
+	# response = make_response(render_template('dashboard.html'))
+	# response.set_cookie('login_token', token, httponly=True, max_age=3600)
+
+	response = jsonify({
+		'success': success,
+		'token': token
+	})
 
 	return response
 
 @app.route('/login', methods=['POST'])
 def login():
 	print("\nlogin\n")
-	user_name = request.form['user_name']
-	password = request.form['password']
+	success = True
+	values = request.get_json()
+	user_name = values['user_name']
+	password = values['password']
+	print(f"user_name: {user_name}")
+	print(f"password: {password}")
 	user = User.query.filter_by(user_name=user_name).first()
 	if not user:
-		return json.dumps({"message": "User does not exist"})
+		success = False
 	if not check_password_hash(user.password_hash, password):
-		return json.dumps({"message": "Incorrect password"})
+		success = False
+	print(f"success: {success}")
+
 	token = generate_login_token(user.user_id)
-	response = make_response(render_template('dashboard.html'))
-	response.set_cookie('login_token', token, httponly=True, max_age=3600)
+	# response = make_response(render_template('dashboard.html'))
+	response = jsonify({
+		'success': success,
+		'token': token
+	})
+	# response.set_cookie('login_token', token, httponly=True, max_age=3600)
 	return response
 
 #join a group, enter a groupname and passcode, link you to that group
@@ -140,32 +162,57 @@ def login():
 def join_group():
 	print("join_group")
 	user_id = get_user_id()
-	group_name = request.form["group_name"]
-	group_passkey = request.form["group_passkey"]
-	group = Group.query.filter_by(group_name=group_name).first()
-	if not group:
-		return json.dumps({"message":"Group does not exist"})
-	if group.passcode != group_passkey:
-		return json.dumps({"message":"Incorrect passcode"})
-	new_link = Link(user_id=user_id, group_id=group.group_id)
-	db.session.add(new_link)
-	db.session.commit()
-	return json.dumps({"message": "User joined group successfully!"})
+	# group_name = request.form["group_name"]
+	# group_passkey = request.form["group_passkey"]
+	values = request.get_json
+	group_name = values['group_name']
+	group_passkey = values['group_passkey']
+
+	success = True
+	try:
+		group = Group.query.filter_by(group_name=group_name).first()
+		if not group:
+			# return json.dumps({"message":"Group does not exist"})
+			success = False
+		if group.passcode != group_passkey:
+			# return json.dumps({"message":"Incorrect passcode"})
+			success = False
+		new_link = Link(user_id=user_id, group_id=group.group_id)
+		db.session.add(new_link)
+		db.session.commit()
+	except:
+		success = False
+
+	result = jsonify({
+		'success': success
+	})
+	return result
 
 #leave group
 @app.route('/leave_group', methods=['POST'])
 def leave_group():
 	print("\nleave_group\n")
+	success = True
 	user_id = get_user_id()
-	group_name = request.form['group_name']
-	group_id = Group.query.filter_by(group_name=group_name).first().group_id
-	link = Link.query.filter_by(user_id=user_id, group_id=group_id).first()
-	if link:
-		db.session.delete(link)
-		db.session.commit()
-		return json.dumps({"message": "User left group successfully!"})
-	else:
-		return json.dumps({"message": "User not in group!"})
+	try:
+		group_name = request.form['group_name']
+		group_id = Group.query.filter_by(group_name=group_name).first().group_id
+		link = Link.query.filter_by(user_id=user_id, group_id=group_id).first()
+		if link:
+			db.session.delete(link)
+			db.session.commit()
+			return json.dumps({"message": "User left group successfully!"})
+		else:
+			return json.dumps({"message": "User not in group!"})
+	except:
+		success = False
+
+	result = jsonify({
+		'success': success
+	})
+
+	return result
+
 
 #delete group
 @app.route('/delete_group', methods=['POST'])
@@ -197,12 +244,20 @@ def get_user_id():
 @app.route('/change_emoji', methods=['POST'])
 def change_emoji():
 	print("\nchange_emoji\n")
+	success = True
 	user_id = get_user_id()
-	new_emoji = request.form['new_emoji']
-	user = User.query.filter_by(user_id=user_id).first()
-	user.emotion = new_emoji
-	db.session.commit()
-	return json.dumps({"message": "Emoji changed successfully!"})
+	try:
+		new_emoji = request.form['new_emoji']
+		user = User.query.filter_by(user_id=user_id).first()
+		user.emotion = new_emoji
+		db.session.commit()
+	except:
+		success = False
+
+		result = jsonify({
+			'success': success
+		})
+	return result
 
 if __name__ == '__main__':
 	with app.app_context():
