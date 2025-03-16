@@ -22,9 +22,9 @@ We addressed the "Communication Beyond Words" challenge by creating a platform w
 - **Flask-CORS**: Handling cross-origin requests
 
 ### Frontend
-- **Plasmo**: Framework for building Chrome extensions
+- **Plasmo/React**: Framework for building Chrome extensions
 - **JavaScript**: For frontend logic and interactions
-- **Chrome Extension API**: For browser integration
+- **HTML/CSS**: For GUI
 
 ## ✨ Features
 
