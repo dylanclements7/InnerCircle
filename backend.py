@@ -5,7 +5,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from flask import render_template
 import jwt
 import time
-
+from werkzeug.security import generate_password_hash, check_password_hash
 
 
 app = Flask(__name__)
@@ -19,6 +19,7 @@ class User(db.Model):
 	user_name: Mapped[str] = mapped_column()
 	user_id: Mapped[int] = mapped_column(primary_key=True, autoincrement=True)
 	emotion: Mapped[str] = mapped_column()
+	password_hash: Mapped[str] = mapped_column()
 
 class Group(db.Model):
 	group_name: Mapped[str] = mapped_column()
@@ -104,9 +105,11 @@ def get_group_users(group_id):
 def create_user():
 	print("\ncreate_user\n")
 	user_name = request.form['user_name']
+	password = request.form['password']
+	password_hash = generate_password_hash(password)
 	print(user_name)
 	emotion = "happy"
-	new_user = User(user_name=user_name, emotion=emotion)
+	new_user = User(user_name=user_name, emotion=emotion, password_hash=password_hash)
 	db.session.add(new_user)
 	db.session.commit()
 
@@ -117,7 +120,20 @@ def create_user():
 
 	return response
 
-
+@app.route('/login', methods=['POST'])
+def login():
+	print("\nlogin\n")
+	user_name = request.form['user_name']
+	password = request.form['password']
+	user = User.query.filter_by(user_name=user_name).first()
+	if not user:
+		return json.dumps({"message": "User does not exist"})
+	if not check_password_hash(user.password_hash, password):
+		return json.dumps({"message": "Incorrect password"})
+	token = generate_login_token(user.user_id)
+	response = make_response(render_template('dashboard.html'))
+	response.set_cookie('login_token', token, httponly=True, max_age=3600)
+	return response
 
 #join a group, enter a groupname and passcode, link you to that group
 @app.route('/join_group', methods=['POST'])
@@ -191,4 +207,4 @@ def change_emoji():
 if __name__ == '__main__':
 	with app.app_context():
 		db.create_all() 
-	app.run(debug=True, port=8080)
+	app.run(debug=True, host= '140.232.178.49', port=8080)
