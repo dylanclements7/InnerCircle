@@ -3,182 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Flask API Test</title>
-    <style>
-        body {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            font-family: Arial, sans-serif;
+    <title>Test Users and Groups</title>
+    <script>
+        async function createUser(userName, password) {
+            const response = await fetch('/create_user', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    user_name: userName,
+                    password: password
+                })
+            });
+            const data = await response.json();
+            return data.token;
         }
-        form {
-            margin-bottom: 2em;
-            padding: 1em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+
+        async function createGroup(token, groupName, passcode, interval) {
+            const response = await fetch('/create_group', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    group_name: groupName,
+                    passcode: passcode,
+                    interval: interval
+                })
+            });
+            const data = await response.json();
+            return data.message;
         }
-        .error {
-            color: red;
-            display: none;
-            margin-top: 5px;
+
+        async function runTests() {
+            const users = [
+                { userName: 'user1', password: 'password1' },
+                { userName: 'user2', password: 'password2' },
+                { userName: 'user3', password: 'password3' }
+            ];
+
+            const groups = [
+                { groupName: 'group1', passcode: 'pass1', interval: 10 },
+                { groupName: 'group2', passcode: 'pass2', interval: 20 },
+                { groupName: 'group3', passcode: 'pass3', interval: 30 }
+            ];
+
+            for (const user of users) {
+                const token = await createUser(user.userName, user.password);
+                console.log(`Created user ${user.userName} with token ${token}`);
+
+                for (const group of groups) {
+                    const message = await createGroup(token, group.groupName, group.passcode, group.interval);
+                    console.log(`Created group ${group.groupName} with message: ${message}`);
+                }
+            }
         }
-    </style>
+    </script>
 </head>
 <body>
-    <h1>Test Flask API</h1>
-
-    <h2>Create User</h2>
-    <form id="create-user-form">
-        <label for="user_name">User Name:</label>
-        <input type="text" id="user_name" name="user_name" required><br><br>
-        <label for="user_id">User ID:</label>
-        <input type="number" id="user_id" name="user_id" required><br><br>
-        <label for="emotion">Emotion:</label>
-        <input type="text" id="emotion" name="emotion" required><br><br>
-        <button type="submit">Create User</button>
-        <div id="create-user-error" class="error"></div>
-    </form>
-
-    <h2>Create Group</h2>
-    <form id="create-group-form">
-        <label for="group_name">Group Name:</label>
-        <input type="text" id="group_name" name="group_name" required><br><br>
-        <label for="group_id">Group ID:</label>
-        <input type="number" id="group_id" name="group_id" required><br><br>
-        <label for="is_anonymous">Is Anonymous:</label>
-        <input type="checkbox" id="is_anonymous" name="is_anonymous"><br><br>
-        <label for="passcode">Passcode:</label>
-        <input type="text" id="passcode" name="passcode" required><br><br>
-        <button type="submit">Create Group</button>
-        <div id="create-group-error" class="error"></div>
-    </form>
-
-    <h2>Join Group</h2>
-    <form id="join-group-form">
-        <label for="join-group-name">Group Name:</label>
-        <input type="text" id="join-group-name" name="group_name" required><br><br>
-        <label for="join-group-passkey">Passcode:</label>
-        <input type="text" id="join-group-passkey" name="group_passkey" required><br><br>
-        <button type="submit">Join Group</button>
-        <div id="join-group-error" class="error"></div>
-    </form>
-
-    <h2>Change Emoji</h2>
-    <form id="change-emoji-form">
-        <label for="new_emoji">New Emoji:</label>
-        <input type="text" id="new_emoji" name="new_emoji" required><br><br>
-        <button type="submit">Change Emoji</button>
-        <div id="change-emoji-error" class="error"></div>
-    </form>
-
-    <script>
-        const headers = {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json'
-        };
-
-        async function handleResponse(response, errorElement) {
-            if (!response.ok) {
-                const errorText = await response.text();
-                console.error(`Error: ${response.status} - ${errorText}`);
-                throw new Error(errorText || `HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        }
-
-        function showError(element, message) {
-            element.textContent = message;
-            element.style.display = 'block';
-            setTimeout(() => {
-                element.style.display = 'none';
-            }, 5000);
-        }
-
-        document.getElementById('create-user-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const errorElement = document.getElementById('create-user-error');
-            
-            try {
-                const response = await fetch('/create_user', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        user_name: document.getElementById('user_name').value,
-                        user_id: parseInt(document.getElementById('user_id').value),
-                        emotion: document.getElementById('emotion').value
-                    })
-                });
-                const data = await handleResponse(response, errorElement);
-                alert(data.message);
-                this.reset();
-            } catch (error) {
-                showError(errorElement, error.message);
-            }
-        });
-
-        document.getElementById('create-group-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const errorElement = document.getElementById('create-group-error');
-            
-            try {
-                const response = await fetch('/create_group', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        group_name: document.getElementById('group_name').value,
-                        group_id: parseInt(document.getElementById('group_id').value),
-                        is_anonymous: document.getElementById('is_anonymous').checked,
-                        passcode: document.getElementById('passcode').value
-                    })
-                });
-                const data = await handleResponse(response, errorElement);
-                alert(data.message);
-                this.reset();
-            } catch (error) {
-                showError(errorElement, error.message);
-            }
-        });
-
-        document.getElementById('join-group-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const errorElement = document.getElementById('join-group-error');
-            
-            try {
-                const response = await fetch('/join_group', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        group_name: document.getElementById('join-group-name').value,
-                        group_passkey: document.getElementById('join-group-passkey').value
-                    })
-                });
-                const data = await handleResponse(response, errorElement);
-                alert(data.message);
-                this.reset();
-            } catch (error) {
-                showError(errorElement, error.message);
-            }
-        });
-
-        document.getElementById('change-emoji-form').addEventListener('submit', async function(event) {
-            event.preventDefault();
-            const errorElement = document.getElementById('change-emoji-error');
-            
-            try {
-                const response = await fetch('/change_emoji', {
-                    method: 'POST',
-                    headers: headers,
-                    body: JSON.stringify({
-                        new_emoji: document.getElementById('new_emoji').value
-                    })
-                });
-                const data = await handleResponse(response, errorElement);
-                alert(data.message);
-                this.reset();
-            } catch (error) {
-                showError(errorElement, error.message);
-            }
-        });
-    </script>
+    <h1>Test Users and Groups</h1>
+    <button onclick="runTests()">Run Tests</button>
 </body>
 </html>
