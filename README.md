@@ -1,45 +1,33 @@
-# InnerCircle
+This is a [Plasmo extension](https://docs.plasmo.com/) project bootstrapped with [`plasmo init`](https://www.npmjs.com/package/plasmo).
 
-## Overview
-Communication Beyond Words is a Chrome extension that connects users emotionally through emojis, allowing for expression and connection without the need for verbal communication. By simplifying emotional expression, this project creates a unique way for users to share their feelings and connect with others in an intuitive, universal language.
+## Getting Started
 
-## 🌟 Concept
-We addressed the "Communication Beyond Words" challenge by creating a platform where users can express themselves primarily through emojis. This approach:
+First, run the development server:
 
-- Breaks down language barriers
-- Simplifies emotional expression
-- Creates a universal way to connect
-- Fosters community through shared emotional states
-- Provides a low-pressure alternative to text-based communication
+```bash
+pnpm dev
+# or
+npm run dev
+```
 
-## 🛠️ Tech Stack
+Open your browser and load the appropriate development build. For example, if you are developing for the chrome browser, using manifest v3, use: `build/chrome-mv3-dev`.
 
-### Backend
-- **Flask**: Python web framework powering our API endpoints
-- **SQLite**: Lightweight database for user and group management
-- **SQLAlchemy**: ORM for database interactions
-- **JWT**: For secure authentication and session management
-- **Flask-CORS**: Handling cross-origin requests
+You can start editing the popup by modifying `popup.tsx`. It should auto-update as you make changes. To add an options page, simply add a `options.tsx` file to the root of the project, with a react component default exported. Likewise to add a content page, add a `content.ts` file to the root of the project, importing some module and do some logic, then reload the extension on your browser.
 
-### Frontend
-- **Plasmo/React**: Framework for building Chrome extensions
-- **JavaScript**: For frontend logic and interactions
-- **HTML/CSS**: For GUI
+For further guidance, [visit our Documentation](https://docs.plasmo.com/)
 
-## ✨ Features
+## Making production build
 
-### User Management
-- Create accounts and secure login
-- Personal emoji selection to represent current emotional state
-- JWT-based authentication
+Run the following:
 
-### Group System
-- Create emoji groups with custom settings
-- Join existing groups via name and passcode
-- Anonymous group options for privacy
-- Customizable update intervals
+```bash
+pnpm build
+# or
+npm run build
+```
 
-### Emotional Expression
-- Change your emoji at any time to reflect your current emotional state
-- View group members and their emotional states in real-time
-- Connect with others through shared emotional experiences
+This should create a production bundle for your extension, ready to be zipped and published to the stores.
+
+## Submit to the webstores
+
+The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!

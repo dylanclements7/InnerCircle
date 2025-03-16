@@ -1,0 +1,871 @@
+.group-view {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: center;
+  background-color: #222222;
+  width: 250px;
+  height: 400px;
+  gap: 10px;
+  border-radius: 8px;
+  padding: 5px;
+}
+
+.group-content {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 5px;
+  font-size: 2.5rem;
+  font-weight: bold;
+}
+
+.group-name {
+  font-size: 2rem;
+  font-weight: bold;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-bottom: 5px;
+  color: #eeeeee;
+  max-width: 100px;
+}
+
+.group-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 2.5rem;
+  height: 35px;
+  width: 35px;
+  color: #0088cc;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: color 0.3s ease, transform 0.3s ease;
+  /* Smooth transition for color and scale */
+}
+
+.group-button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0044cc;
+  /* Darker blue on hover */
+  transform: scale(1.05);
+  /* Slight zoom effect */
+  border-color: #2563EB;
+  /* Change border color on hover */
+}
+
+.group-button:active {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0055aa;
+}
+
+.group-members {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.group-members ul {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  list-style: none;
+  padding: 0;
+}
+
+.group-members li {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: inline-block;
+  margin: 0 5px;
+  background: #f3f3f3;
+  padding: 5px 10px;
+  border-radius: 10px;
+}
+
+.member-name {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #f3f3f3;
+  padding: 5px 10px;
+  border-radius: 10px;
+  font-size: 14px;
+  text-align: center;
+}
+
+.emoji-group {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  /* Center the emojis horizontally */
+  align-items: center;
+  /* Center the emojis vertically */
+  flex-wrap: wrap;
+  width: 150px;
+  /* Fixed width */
+  height: 250px;
+  /* Fixed height */
+  overflow: hidden;
+  /* Prevents emojis from overflowing */
+  background-color: #333333;
+  border-radius: 5px;
+  padding: 5px;
+  position: relative;
+  overflow: scroll;
+
+}
+
+.emoji {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.8rem;
+  text-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  height: auto;
+}
+
+.select-emoji-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px 10px;
+  background-color: #979797;
+  border-radius: 20px;
+  border: 2px solid #666666;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  height: 35px;
+  margin-bottom: 20px;
+}
+
+.select-emoji-button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #444444;
+  transform: scale(1.05);
+}
+
+.select-emoji-button p {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin: 0;
+  line-height: 1;
+}
+
+.emoji-selector-close {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.125rem;
+  /* Font size */
+  font-weight: 500;
+  /* Font weight */
+  width: 50px;
+  align-items: center;
+  /* Center horizontally */
+  justify-content: center;
+  /* Center vertically */
+  text-align: center;
+  color: #eeeeee;
+  /* Blue color */
+  cursor: pointer;
+  /* Make it clickable */
+  transition: color 0.3s ease, transform 0.3s ease;
+  /* Smooth transition for color and scale */
+  padding: 8px 16px;
+  /* Padding for button-like look */
+  border-radius: 6px;
+  /* Rounded corners */
+  border: 2px solid #666666;
+  /* Border with initial blue color */
+}
+
+.emoji-selector-close:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #888888;
+  /* Darker blue on hover */
+  border-color: #aaaaaa;
+  /* Change border color on hover */
+}
+
+.actual-emoji-selector {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 20px
+}
+
+.nameList {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #eeeeee;
+  font-size: 1.2rem;
+
+}
+
+.emoji-name-pair {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  padding: 8px
+}
+
+.floating {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  background-color: #222222;
+  color: #222222;
+  padding: 5px;
+  border-radius: 5px;
+  z-index: 9999;
+}
+
+.hamburger-menu {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  bottom: 10px;
+}
+
+.hamburger-icon {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 30px;
+  background-color: transparent;
+  border: none;
+  color: #ffffff;
+  cursor: pointer;
+  padding: 10px;
+  border-radius: 5px;
+}
+
+.hamburger-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.hamburger-icon:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #444444;
+}
+
+.hamburger-icon:active {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0055aa;
+
+}
+
+
+.dropdown-menu {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: block;
+  color: #eeeeee;
+  border: 1px solid #444444;
+  border-radius: 5px;
+  margin-top: 10px;
+  margin-bottom: 20px;
+  padding: 10px;
+  width: 200px;
+  height: 50px;
+  text-align: center;
+}
+
+.dropdown-menu ul {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  /* Use Flexbox to lay out the <li> elements horizontally */
+  justify-content: center;
+  /* Center the <li> elements */
+}
+
+.dropdown-menu li {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin: 0 10px;
+  /* Add space between the options */
+}
+
+.dropdown-menu li a {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-decoration: none;
+  color: white;
+  font-size: 16px;
+  padding: 8px 15px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+.dropdown-menu li a:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #007BFF;
+  /* Add background color when hovered */
+  color: #ffffff;
+  /* Keep the text color white when hovering */
+}
+
+.check-in {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+  background-color: #222222;
+  padding: 20px;
+  border-radius: 16px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.check-in p {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #eeeeee;
+  /* Gray-700 */
+}
+
+.check-in .emotion-text {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #3B82F6;
+  /* Blue-600 */
+  cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.check-in .emotion-text:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #2563EB;
+  /* Blue-800 */
+}
+
+.check-in button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-top: 16px;
+  background-color: #eeeeee;
+  /* Gray-200 */
+  color: #eeeeee;
+  /* Gray-700 */
+  padding: 10px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.view-groups-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.125rem;
+  /* Font size */
+  font-weight: 500;
+  /* Font weight */
+  width: 150px;
+  align-items: center;
+  /* Center horizontally */
+  justify-content: center;
+  /* Center vertically */
+  text-align: center;
+  color: #0088cc;
+  /* Blue color */
+  cursor: pointer;
+  /* Make it clickable */
+  transition: color 0.3s ease, transform 0.3s ease;
+  /* Smooth transition for color and scale */
+  padding: 8px 16px;
+  /* Padding for button-like look */
+  border-radius: 8px;
+  /* Rounded corners */
+  border: 2px solid #3B82F6;
+  /* Border with initial blue color */
+}
+
+.view-groups-button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #0044cc;
+  /* Darker blue on hover */
+  transform: scale(1.05);
+  /* Slight zoom effect */
+  border-color: #2563EB;
+  /* Change border color on hover */
+}
+
+.center-view-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.check-in button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #D1D5DB;
+  /* Gray-300 */
+}
+
+.group-manager {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 250px;
+  height: 400px;
+  border-radius: 8px;
+  gap: 10px;
+  padding: 5px;
+}
+
+.group-selector {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  justify-content: center;
+  width: 210px;
+  height: 300px;
+  background-color: #333333;
+  border-radius: 12px;
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+  margin-bottom: 75px;
+  margin-top: 50px;
+}
+
+.group-selector input {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  border-radius: 8px;
+  border: 2px solid #777777;
+  background-color: #333333;
+  color: #eeeeee;
+  transition: border-color 0.3s ease;
+  width: 180px;
+  height: 30px;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.group-selector input:focus {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  border-color: #3B82F6;
+  outline: none;
+}
+
+.group-selector .form-description {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1rem;
+  color: #aaaaaa;
+  text-align: center;
+}
+
+.form-container {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 250px;
+  width: 150px;
+}
+
+.form-header {
+  padding: 0px;
+  font-weight: bold;
+  text-align: center;
+  font-size: 24px;
+  color: #eeeeee;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+
+}
+
+.input-group {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 150px;
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.button-container {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.submit-join button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 1.125rem;
+  font-weight: bold;
+  color: #0088cc;
+  background-color: #333333;
+  border-radius: 8px;
+  border: 2px solid #0066cc;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 100%;
+  height: 45px;
+  max-width: 250px;
+  text-align: center;
+  margin-bottom: 10px;
+  margin-top: 25px;
+}
+
+.submit-join button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #333333;
+  transform: scale(1.05);
+  border-color: #0044cc;
+  color: #0066cc
+}
+
+.create-group-button button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  justify-content: center;
+  margin-top: 75px;
+  font-size: 0.9rem;
+  font-weight: bold;
+  color: #eeeeee;
+  background-color: #333333;
+  border-radius: 8px;
+  border: 2px solid #cccccc;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+  width: 150px;
+  height: 30px;
+}
+
+.create-group-button button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0088cc;
+  transform: scale(1.05);
+  color: #eeeeee
+}
+
+
+
+.c-form {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: #333333;
+  border-radius: 8px;
+  width: 250px;
+  height: 400px;
+  gap: 10px;
+  padding: 5px;
+  color: #eeeeee;
+}
+
+.c-groupname,
+.c-password,
+.c-anonymous,
+.c-interval {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 175px;
+}
+
+.c-groupname label,
+.c-password label,
+.c-anonymous label,
+.c-interval label {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 18;
+  font-weight: bold;
+  margin-bottom: 5px;
+  color: #eeeeee;
+  justify-content: center;
+}
+
+.c-groupname input,
+.c-password input,
+.c-interval input {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  justify-content: center;
+  padding: 8px;
+  border: 1px solid #555;
+  border-radius: 5px;
+  font-size: 14px;
+  width: 100%;
+  background: #333;
+  color: #eeeeee;
+}
+
+.c-groupname input::placeholder,
+.c-password input::placeholder,
+.c-interval input::placeholder {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #bbb;
+}
+
+.c-checkbox {
+  transform: scale(1.5);
+}
+
+.c-submit button {
+  margin-top: 25px;
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #007bff;
+  color: white;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  width: 100%;
+  font-size: 16px;
+  transition: background 0.3s ease;
+}
+
+.c-submit button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #0056b3;
+}
+
+/* added vvvvv */
+.l-big-class h2 {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+  color: #ffffff;
+}
+
+.l-form {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+  width: 300px;
+  text-align: center;
+}
+
+.l-label,
+.l-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #eeeeee;
+}
+
+.l-input-name,
+.l-input-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-bottom: 15px;
+}
+
+.l-input-input,
+.l-password-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 85%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #333;
+  color: #eeeeee;
+  outline: none;
+}
+
+.l-input-input::placeholder,
+.l-password-password::placeholder {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #aaaaaa;
+}
+
+.l-submit {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0066cc;
+  color: #eeeeee;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.l-submit:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0044cc;
+}
+
+.l-big-class p {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: red;
+  font-size: 14px;
+}
+
+.landing-page {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #eeeeee;
+}
+
+.tab-bar {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-top: 5px;
+  margin-left: 5px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tab-login {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #555555;
+  color: #eeeeee;
+  border: 3px solid #333333;
+  padding: 5px;
+  width: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.tab-login:hover {
+  background-color: #777777;
+  /* Lighten background on hover */
+  border-color: #555555;
+  /* Adjust border color on hover */
+}
+
+.tab-join {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #555555;
+  color: #eeeeee;
+  border: 3px solid #333333;
+  padding: 5px;
+  width: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.tab-join:hover {
+  background-color: #777777;
+  /* Lighten background on hover */
+  border-color: #555555;
+  /* Adjust border color on hover */
+}
+
+
+.j-big-class h2 {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  text-align: center;
+  color: #ffffff;
+}
+
+.j-form {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #1e1e1e;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(255, 255, 255, 0.1);
+  width: 300px;
+  text-align: center;
+}
+
+.j-label,
+.j-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  display: block;
+  margin-bottom: 5px;
+  font-size: 14px;
+  color: #eeeeee;
+}
+
+.j-input-name,
+.j-input-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  margin-bottom: 15px;
+}
+
+.j-input-input,
+.j-password-password {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  width: 85%;
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  font-size: 14px;
+  background-color: #333;
+  color: #eeeeee;
+  outline: none;
+}
+
+.j-input-input::placeholder,
+.j-password-password::placeholder {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: #aaaaaa;
+}
+
+.j-submit {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0066cc;
+  color: #eeeeee;
+  border: none;
+  padding: 10px;
+  width: 100%;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background 0.3s;
+}
+
+.j-submit:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #0044cc;
+}
+
+.j-big-class p {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  color: red;
+  font-size: 14px;
+}
+
+.f-view-groups-button-container {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  text-align: center;
+  height: 25px;
+  width: 45px;
+}
+
+.f-view-groups-button {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #555555;
+  color: #eeeeee;
+  border: 3px solid #333333;
+  width: 90px;
+  padding: 3px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: background 0.3s;
+  margin-bottom: 5px;
+  text-align: center;
+}
+
+.f-view-groups-button:hover {
+  font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: #777777;
+  /* Lighten background on hover */
+  border-color: #555555;
+  /* Adjust border color on hover */
+}
