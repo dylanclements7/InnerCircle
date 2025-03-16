@@ -65,7 +65,7 @@ def verify_token(token):
 
 @app.route('/check_token', methods=['POST'])
 def check_token():
-	token = request.form
+	token = request.headers['login_token']
 	return verify_token(token)
 
 @app.route('/')
@@ -97,7 +97,9 @@ def create_group():
 	db.session.add(new_group)
 	db.session.commit()
 	group_id = new_group.group_id
-	user_id = get_user_id()
+	values = request.get_json()
+	token = values['login_token']
+	user_id = get_user_id(token)
 	new_link = Link(user_id=user_id, group_id=group_id)
 	db.session.add(new_link)
 	db.session.commit()
@@ -118,6 +120,37 @@ def get_group_users(group_id):
 	group_users = Link.query.filter_by(group_id=group_id).all()
 	user_ids = [link.user_id for link in group_users]
 	return user_ids
+
+# load all groups and users in the groups (names and emotions), storing a a list of dictionaries
+@app.route('/load_groups', methods=['POST'])
+def load_groups():
+	print("\nload_groups\n")
+	success = True
+	# values = request.get_json()
+	# token = values['login_token']
+	token = request.headers
+	print(token)
+	token = token['login_token']
+	# token = ""
+	print(token)
+	user_id = get_user_id(token)
+	group_ids = get_user_groups(user_id)
+	groups = []
+	for group_id in group_ids:
+		group = Group.query.filter_by(group_id=group_id).first()
+		groups.append(group.group_name)
+		group_users = get_group_users(group_id)
+		users = []
+		for user_id in group_users:
+			user = User.query.filter_by(user_id=user_id).first()
+			users.append({"user_name": user.user_name, "emotion": user.emotion})
+		groups.append(users)
+	response = jsonify({
+		'success': success,
+		'groups': groups
+	})
+	print(f"response: {response}")
+	return user_id
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
@@ -180,10 +213,11 @@ def login():
 @app.route('/join_group', methods=['POST'])
 def join_group():
 	print("join_group")
-	user_id = get_user_id()
 	# group_name = request.form["group_name"]
 	# group_passkey = request.form["group_passkey"]
-	values = request.get_json
+	values = request.get_json()
+	token = values['login_token']
+	user_id = get_user_id(token)
 	group_name = values['group_name']
 	group_passkey = values['group_passkey']
 
@@ -205,6 +239,7 @@ def join_group():
 	result = jsonify({
 		'success': success
 	})
+	print(result)
 	return result
 
 #leave group
@@ -212,7 +247,9 @@ def join_group():
 def leave_group():
 	print("\nleave_group\n")
 	success = True
-	user_id = get_user_id()
+	values = request.get_json
+	token = values['login_token']
+	user_id = get_user_id(token)
 	try:
 		group_name = request.form['group_name']
 		group_id = Group.query.filter_by(group_name=group_name).first().group_id
@@ -240,7 +277,9 @@ def delete_group():
 	group_name = request.form['group_name']
 	group_id = Group.query.filter_by(group_name=group_name).first().group_id
 	owner_id = Group.query.filter_by(group_id=group_id).first().owner_id
-	user_id = get_user_id()
+	values = request.get_json
+	token = values['login_token']
+	user_id = get_user_id(token)
 	if owner_id != user_id:
 		return json.dumps({"message": "User not owner of group!"})
 	links = Link.query.filter_by(group_id=group_id).all()
@@ -253,8 +292,12 @@ def delete_group():
 	return json.dumps({"message": "Group deleted successfully!"})
 
 
-def get_user_id():
-	token = request.cookies.get('login_token')
+def get_user_id(token):
+	# values = request.json
+	# token = values['login_token']
+	token = verify_token(token)
+	print('\nget_user_id')
+	print(f'token: {token}\n')
 	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
 	return decoded_token['user_id']
 	
@@ -264,7 +307,9 @@ def get_user_id():
 def change_emoji():
 	print("\nchange_emoji\n")
 	success = True
-	user_id = get_user_id()
+	values = request.get_json
+	token = values['login_token']
+	user_id = get_user_id(token)
 	try:
 		new_emoji = request.form['new_emoji']
 		user = User.query.filter_by(user_id=user_id).first()
