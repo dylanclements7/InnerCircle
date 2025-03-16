@@ -10,7 +10,7 @@ from flask_cors import CORS
 
 
 app = Flask(__name__)
-CORS(app)
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": ["Content-Type", "Authorization", "login_token"]}})
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = True
 app.config['SECRET_KEY'] = 'this'
@@ -37,44 +37,58 @@ class Link(db.Model):
 
 
 def verify_token(token):
-	success = True
-	decoded_token = {}
-	try:
-		decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-		if decoded_token['exp'] > int(time.time()):
-			# response = app.response_class(
-			# 	response=json.dumps({"message": "User created successfully!", "token": token}),
-			# 	status=200,
-			# 	mimetype='application/json'
-			# )
-			# response.set_cookie('login_token', token, httponly=True, max_age=3600)
-
-			token = generate_login_token(decoded_token['user_id'])
-			decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-	except jwt.ExpiredSignatureError:
-		success = False
-	except jwt.InvalidTokenError:
-		success = False
-	
-	result = jsonify({
-		'success': success,
-		'token': token
-	})
-
-	return result
+    success = True
+    try:
+        # Decode the token
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        
+        # Check if token is expired
+        if decoded_token['exp'] <= int(time.time()):
+            success = False
+            return jsonify({'success': False, 'message': 'Token expired'})
+            
+        # If token is valid, return success
+        return jsonify({
+            'success': True,
+            'user_id': decoded_token['user_id'],
+            'token': token  # Return same token if it's still valid
+        })
+        
+    except jwt.ExpiredSignatureError:
+        success = False
+        return jsonify({'success': False, 'message': 'Token expired'})
+    except jwt.InvalidTokenError:
+        success = False
+        return jsonify({'success': False, 'message': 'Invalid token'})
 
 @app.route('/check_token', methods=['POST'])
 def check_token():
-	token = request.headers['login_token']
+
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+
+	print(f"\ntoken: {token}\n")
+
+    # Check if we have a token from JSON body as fallback
+	if token is None and request.is_json:
+		data = request.get_json()
+		token = data.get('token') or data.get('login_token')
+	if not token:
+		return jsonify({'success': False, 'message': 'No token provided'})
 	return verify_token(token)
 
 @app.route('/')
 def index():
 	print('index')
 	# check if token exists, if not log in
-	# return render_template('test.html')
-	token = request.cookies.get('login_token')
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
 	# Connect using token if present
+
 	if (token):
 		token = verify_token(token)
 		return render_template('dashboard.html')
@@ -97,8 +111,15 @@ def create_group():
 	db.session.add(new_group)
 	db.session.commit()
 	group_id = new_group.group_id
-	values = request.get_json()
-	token = values['login_token']
+
+	# values = request.get_json()
+	# token = values['login_token']
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+
+
 	user_id = get_user_id(token)
 	new_link = Link(user_id=user_id, group_id=group_id)
 	db.session.add(new_link)
@@ -125,32 +146,57 @@ def get_group_users(group_id):
 @app.route('/load_groups', methods=['POST'])
 def load_groups():
 	print("\nload_groups\n")
-	success = True
-	# values = request.get_json()
-	# token = values['login_token']
-	token = request.headers
-	print(token)
-	token = token['login_token']
-	# token = ""
-	print(token)
-	user_id = get_user_id(token)
-	group_ids = get_user_groups(user_id)
-	groups = []
-	for group_id in group_ids:
-		group = Group.query.filter_by(group_id=group_id).first()
-		groups.append(group.group_name)
+
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+
+	if not token:
+		return jsonify({'success': False, 'message': 'No token provided'})
+	try:
+        # Decode token directly (don't use verify_token here)
+		decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+		user_id = decoded_token['user_id']
+		print(f"user_id: {user_id}")
+
+        # Get user groups
+		group_ids = get_user_groups(user_id)
+		print(f"group_ids: {group_ids}")
+
+		if not group_ids:
+			return jsonify({
+				'success': True,
+				'groups': []})
+		groups_data = []
+		
+		for group_id in group_ids:
+			group = Group.query.filter_by(group_id=group_id).first()
+			if not group:
+				continue
+
 		group_users = get_group_users(group_id)
 		users = []
 		for user_id in group_users:
 			user = User.query.filter_by(user_id=user_id).first()
-			users.append({"user_name": user.user_name, "emotion": user.emotion})
-		groups.append(users)
-	response = jsonify({
-		'success': success,
-		'groups': groups
-	})
-	print(f"response: {response}")
-	return user_id
+			if user:
+				users.append({"user_name": user.user_name, "emotion": user.emotion})
+        
+		groups_data.append({
+            "name": group.group_name,
+            "group_id": group.group_id,
+            "is_anonymous": group.is_anonymous,
+            "users": users
+        })
+		result = jsonify({
+            'success': True,
+            'groups': groups_data
+        })
+		print(result)
+		return result
+	except Exception as e:
+		print(f"Error in load_groups: {str(e)}")
+		return jsonify({'success': False, 'message': str(e)})
 
 @app.route('/create_user', methods=['POST'])
 def create_user():
@@ -215,9 +261,13 @@ def join_group():
 	print("join_group")
 	# group_name = request.form["group_name"]
 	# group_passkey = request.form["group_passkey"]
-	values = request.get_json()
-	token = values['login_token']
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+	
 	user_id = get_user_id(token)
+	values = request.get_json()
 	group_name = values['group_name']
 	group_passkey = values['group_passkey']
 
@@ -247,8 +297,12 @@ def join_group():
 def leave_group():
 	print("\nleave_group\n")
 	success = True
-	values = request.get_json
-	token = values['login_token']
+
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+	
 	user_id = get_user_id(token)
 	try:
 		group_name = request.form['group_name']
@@ -277,8 +331,12 @@ def delete_group():
 	group_name = request.form['group_name']
 	group_id = Group.query.filter_by(group_name=group_name).first().group_id
 	owner_id = Group.query.filter_by(group_id=group_id).first().owner_id
-	values = request.get_json
-	token = values['login_token']
+	
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+
 	user_id = get_user_id(token)
 	if owner_id != user_id:
 		return json.dumps({"message": "User not owner of group!"})
@@ -293,13 +351,11 @@ def delete_group():
 
 
 def get_user_id(token):
-	# values = request.json
-	# token = values['login_token']
-	token = verify_token(token)
-	print('\nget_user_id')
-	print(f'token: {token}\n')
-	decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
-	return decoded_token['user_id']
+    try:
+        decoded_token = jwt.decode(token, app.config['SECRET_KEY'], algorithms=["HS256"])
+        return decoded_token['user_id']
+    except (jwt.ExpiredSignatureError, jwt.InvalidTokenError):
+        return None
 	
 
 # change emoji of a user
@@ -307,8 +363,12 @@ def get_user_id(token):
 def change_emoji():
 	print("\nchange_emoji\n")
 	success = True
-	values = request.get_json
-	token = values['login_token']
+	
+	token = None
+	auth_header = request.headers.get('Authorization')
+	if auth_header.startswith('Bearer '):
+		token = auth_header[7:]
+
 	user_id = get_user_id(token)
 	try:
 		new_emoji = request.form['new_emoji']
@@ -327,3 +387,5 @@ if __name__ == '__main__':
 	with app.app_context():
 		db.create_all() 
 	app.run(debug=True, host= '140.232.178.49', port=8080)
+	# app.run(debug=True, host= '192.0.0.2', port=8080)
+	
